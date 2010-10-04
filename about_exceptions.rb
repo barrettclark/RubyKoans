@@ -6,29 +6,32 @@ class AboutExceptions < EdgeCase::Koan
   end
 
   def test_exceptions_inherit_from_Exception
-    assert_equal __, MySpecialError.ancestors[1]
-    assert_equal __, MySpecialError.ancestors[2]
-    assert_equal __, MySpecialError.ancestors[3]
-    assert_equal __, MySpecialError.ancestors[4]
+    # MySpecialError.ancestors[0] = AboutExceptions::MySpecialError
+    assert_equal RuntimeError, MySpecialError.ancestors[1]
+    assert_equal StandardError, MySpecialError.ancestors[2]
+    assert_equal Exception, MySpecialError.ancestors[3]
+    assert_equal Object, MySpecialError.ancestors[4]
   end
 
   def test_rescue_clause
     result = nil
     begin
+      # NOTE: fail is a synonym for Kernel.raise (BAC)
       fail "Oops"
     rescue StandardError => ex
       result = :exception_handled
     end
 
-    assert_equal __, result
+    assert_equal :exception_handled, result
 
-    assert ex.is_a?(___), "Failure message."
-    assert ex.is_a?(___), "Failure message."
+    assert ex.is_a?(Exception), "Failure message."
+    # why the redundant line?
+    # assert ex.is_a?(Exception), "Failure message."
 
     assert RuntimeError.ancestors.include?(StandardError),
       "RuntimeError is a subclass of StandardError"
 
-    assert_equal __, ex.message
+    assert_equal 'Oops', ex.message
   end
 
   def test_raising_a_particular_error
@@ -40,8 +43,8 @@ class AboutExceptions < EdgeCase::Koan
       result = :exception_handled
     end
 
-    assert_equal __, result
-    assert_equal __, ex.message
+    assert_equal :exception_handled, result
+    assert_equal "My Message", ex.message
   end
 
   def test_ensure_clause
@@ -54,13 +57,13 @@ class AboutExceptions < EdgeCase::Koan
       result = :always_run
     end
 
-    assert_equal __, result
+    assert_equal :always_run, result
   end
 
   # Sometimes, we must know about the unknown
   def test_asserting_an_error_is_raised
     # A do-end is a block, a topic to explore more later
-    assert_raise(___) do
+    assert_raise(MySpecialError) do
       raise MySpecialError.new("New instances can be raised directly.")
     end
   end

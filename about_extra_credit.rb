@@ -28,12 +28,12 @@ class DiceSet
     score
   end
   
-  def remaining_dice
+  def remaining_dice_count
     threesome = set_of_three
     remaining = @values
     3.times { remaining.delete_at(remaining.index(threesome)) } if threesome
     [2, 3, 4, 6].each { |n| remaining.delete(n) }
-    remaining
+    remaining.count
   end
   
   def set_of_three
@@ -43,6 +43,38 @@ class DiceSet
 end
 
 class Player
+  attr_reader :score
+  def initialize
+    @dice = DiceSet.new
+    @dice_count = 5
+    @score = 0
+    @risk_factor = rand(100)
+    puts "Player created with a risk factor of #{@risk_factor}"
+  end
+  
+  def play
+    turn_score = 0
+    while end_game? == false
+      roll
+      break if @dice.score == 0
+      turn_score += @dice.score
+      break unless roll_again?
+      @dice_count = @dice.remaining_dice_count > 0 ? @dice.remaining_dice_count : 5
+    end
+    @score += turn_score
+  end
+  
+  private
+  def end_game?
+    @score >= 3000
+  end
+  def roll
+    @dice.roll(@dice_count)
+    puts "Player rolled: #{@dice.values} for a score of #{@dice.score}"
+  end
+  def roll_again?
+    @dice.score > 0 && rand(100) >= @risk_factor
+  end
 end
 
 class Game

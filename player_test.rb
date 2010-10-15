@@ -10,16 +10,22 @@ class PlayerTest < EdgeCase::TestCase
     @risky_player = Player.new(100)
   end
   
-  # def test_play_returns_a_number
-  #   score = @risky_player.play
-  #   assert score >= 0
-  #   assert_equal score, @risky_player.score
-  #   assert_equal false, @risky_player.end_game?
-  # end
+  def test_play_returns_a_number
+    score = @risky_player.play
+    assert score >= 0
+    assert_equal score, @risky_player.score
+    assert_equal false, @risky_player.end_game?
+  end
+  
+  def test_calculate_turn_score
+    assert_equal 350, @risky_player.calculate_turn_score([300, 50])
+    assert_equal 0, @risky_player.calculate_turn_score([300, 50, 0])
+  end
   
   def test_roll_with_different_dice_counts
     score = @risky_player.roll(5)
     assert score >= 0
+    assert_equal false, @risky_player.end_game?
     score = @risky_player.roll(2)
     assert score >= 0
   end

@@ -41,15 +41,18 @@ class DiceSetTest < EdgeCase::TestCase
   
   def test_remaining_dice_count
     @dice.set_values([1, 1, 1, 1, 1])
-    assert_equal 2, @dice.remaining_dice_count
+    assert_equal 0, @dice.remaining_dice_count
 
     @dice.set_values([1, 2, 3, 4, 5])
-    assert_equal 2, @dice.remaining_dice_count
+    assert_equal 3, @dice.remaining_dice_count
 
     @dice.set_values([1, 1, 1, 4, 5])
     assert_equal 1, @dice.remaining_dice_count
 
     @dice.set_values([3, 3, 3, 6, 6])
-    assert_equal 0, @dice.remaining_dice_count
+    assert_equal 2, @dice.remaining_dice_count
+
+    @dice.set_values([2, 2, 4, 4, 6])
+    assert_equal 5, @dice.remaining_dice_count
   end
 end

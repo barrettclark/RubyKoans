@@ -33,7 +33,7 @@ class DiceSet
     threesome = set_of_three
     remaining = @values
     3.times { remaining.delete_at(remaining.index(threesome)) } if threesome
-    [2, 3, 4, 6].each { |n| remaining.delete(n) }
+    [1, 5].each { |n| remaining.delete(n) }
     remaining.count
   end
   
@@ -49,15 +49,14 @@ class Player
     @log = Logger.new(STDOUT)
     @dice = DiceSet.new
     @score = 0
-    @roll_scores = Array.new
     @risk_factor = risk_factor
     @log.info "Player created with a risk factor of #{@risk_factor}"
   end
   
-  def calculate_turn_score
+  def calculate_turn_score(roll_scores)
     score = 0
-    if @roll_scores.last != 0
-      score += @roll_scores.inject { |sum, score| sum += score }
+    if roll_scores.last != 0
+      score += roll_scores.inject { |sum, score| sum += score }
     end
     score
   end
@@ -68,16 +67,18 @@ class Player
 
   def play
     dice_count = 5
+    roll_scores = []
     while end_game? == false
-      @roll_scores << roll(dice_count)
-      if roll_again?(@roll_scores.last)
-        dice_count = @dice.remaining_dice_count > 0 ? @dice.remaining_dice_count : 5
+      roll_scores << roll(dice_count)
+      if roll_again?(roll_scores.last)
+        remaining_dice_count = @dice.remaining_dice_count
+        dice_count = remaining_dice_count > 0 ? remaining_dice_count : 5
       else
         @log.info "Player is finished with this turn"
         break
       end
     end
-    @score += calculate_turn_score
+    @score += calculate_turn_score(roll_scores)
   end
   
   def roll(dice_count)

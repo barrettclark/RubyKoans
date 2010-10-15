@@ -6,6 +6,7 @@
 # You already have a DiceSet class and score function you can use.
 # Write a player class and a Game class to complete the project.  This
 # is a free form assignment, so approach it however you desire.
+require 'logger'
 
 class DiceSet
   attr_reader :values
@@ -44,36 +45,49 @@ end
 
 class Player
   attr_reader :score
-  def initialize
+  def initialize(risk_factor = rand(100))
+    @log = Logger.new(STDOUT)
     @dice = DiceSet.new
-    @dice_count = 5
     @score = 0
-    @risk_factor = rand(100)
-    puts "Player created with a risk factor of #{@risk_factor}"
+    @roll_scores = Array.new
+    @risk_factor = risk_factor
+    @log.info "Player created with a risk factor of #{@risk_factor}"
   end
   
-  def play
-    turn_score = 0
-    while end_game? == false
-      roll
-      break if @dice.score == 0
-      turn_score += @dice.score
-      break unless roll_again?
-      @dice_count = @dice.remaining_dice_count > 0 ? @dice.remaining_dice_count : 5
+  def calculate_turn_score
+    score = 0
+    if @roll_scores.last != 0
+      score += @roll_scores.inject { |sum, score| sum += score }
     end
-    @score += turn_score
+    score
   end
   
-  private
   def end_game?
     @score >= 3000
   end
-  def roll
-    @dice.roll(@dice_count)
-    puts "Player rolled: #{@dice.values} for a score of #{@dice.score}"
+
+  def play
+    dice_count = 5
+    while end_game? == false
+      @roll_scores << roll(dice_count)
+      if roll_again?(@roll_scores.last)
+        dice_count = @dice.remaining_dice_count > 0 ? @dice.remaining_dice_count : 5
+      else
+        @log.info "Player is finished with this turn"
+        break
+      end
+    end
+    @score += calculate_turn_score
   end
-  def roll_again?
-    @dice.score > 0 && rand(100) >= @risk_factor
+  
+  def roll(dice_count)
+    @dice.roll(dice_count)
+    @log.info "Player rolled: #{@dice.values} for a score of #{@dice.score}"
+    @dice.score
+  end
+
+  def roll_again?(score, roll_chance = rand(100))
+    score >= 300 && roll_chance <= @risk_factor
   end
 end
 

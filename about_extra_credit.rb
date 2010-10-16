@@ -44,16 +44,21 @@ class DiceSet
 end
 
 class Player
-  attr_reader :score
-  def initialize(risk_factor = rand(100))
+  attr_reader :score, :name
+  def initialize(name, risk_factor = rand(100))
     @log = Logger.new(STDOUT)
     @log.level = Logger::INFO
     @dice = DiceSet.new
     @score = 0
+    @name = name
     @risk_factor = risk_factor
     @log.debug "Player created with a risk factor of #{@risk_factor}"
   end
   
+  def <=>(other)
+    self.score <=> other.score
+  end
+
   def calculate_turn_score(roll_scores)
     score = 0
     if roll_scores.last != 0
@@ -84,7 +89,7 @@ class Player
   end
   
   def final_roll
-    @score += calculate_turn_score(roll(5))
+    @score += calculate_turn_score([roll(5)])
   end
   
   def roll(dice_count)
@@ -102,11 +107,13 @@ class Game
   attr_reader :players
   def initialize(player_count = 2)
     @players = []
-    player_count.times { @players << Player.new }
+    player_count.times { |n| @players << Player.new("Player #{n}") }
   end
   
   def play
     leader = play_initial_round
+    play_lightening_round(leader)
+    puts "#{winner.name} is the winner with a score of #{winner.score}"
   end
   
   def play_initial_round
@@ -123,7 +130,11 @@ class Game
     remaining_players.each { |player| player.final_roll }
   end
   
-  def announce_winner
-    
+  def winner
+    @players.sort.last
   end
 end
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+game = Game.new(5)
+game.play

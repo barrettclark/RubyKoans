@@ -2,12 +2,12 @@ require 'test_helper'
 require File.expand_path(File.dirname(__FILE__) + '/about_extra_credit')
 
 class Player
-  attr_accessor :roll_scores
+  attr_accessor :score
 end
 
 class PlayerTest < EdgeCase::TestCase
   def setup
-    @risky_player = Player.new(100)
+    @risky_player = Player.new('Risky Player', 100)
   end
   
   def test_play_returns_a_number
@@ -45,5 +45,16 @@ class PlayerTest < EdgeCase::TestCase
     end
     assert loop_count > 1
     assert @risky_player.score >= 3000
+  end
+  
+  def test_sort
+    @player2 = Player.new('Player 2')
+    @player3 = Player.new('Player 3')
+    @risky_player.score = 100
+    @player2.score = 1000
+    @player3.score = 0
+    players = [@risky_player, @player2, @player3]
+    players.sort!
+    assert_equal @player2, players.last
   end
 end

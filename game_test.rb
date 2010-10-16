@@ -15,4 +15,10 @@ class GameTest < EdgeCase::TestCase
     assert leader.is_a?(Player)
     assert leader.end_game?
   end
+  
+  def test_play_lightening_round
+    leader = @game.players[0]
+    @game.play_lightening_round(leader)
+    assert leader.score <= @game.players.last.score
+  end
 end

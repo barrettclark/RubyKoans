@@ -36,4 +36,14 @@ class PlayerTest < EdgeCase::TestCase
     assert_equal true, @risky_player.roll_again?(300)
     assert_equal true, @risky_player.roll_again?(1050, 25)
   end
+  
+  def test_that_a_player_can_get_3000_points
+    loop_count = 0
+    while @risky_player.score < 3000
+      loop_count += 1
+      @risky_player.play
+    end
+    assert loop_count > 1
+    assert @risky_player.score >= 3000
+  end
 end

@@ -47,10 +47,11 @@ class Player
   attr_reader :score
   def initialize(risk_factor = rand(100))
     @log = Logger.new(STDOUT)
+    @log.level = Logger::INFO
     @dice = DiceSet.new
     @score = 0
     @risk_factor = risk_factor
-    @log.info "Player created with a risk factor of #{@risk_factor}"
+    @log.debug "Player created with a risk factor of #{@risk_factor}"
   end
   
   def calculate_turn_score(roll_scores)
@@ -74,16 +75,21 @@ class Player
         remaining_dice_count = @dice.remaining_dice_count
         dice_count = remaining_dice_count > 0 ? remaining_dice_count : 5
       else
-        @log.info "Player is finished with this turn"
+        @log.debug "Player is finished with this turn"
         break
       end
     end
-    @score += calculate_turn_score(roll_scores)
+    @score += calculate_turn_score(roll_scores) unless roll_scores.empty?
+    @score
+  end
+  
+  def final_roll
+    @score += calculate_turn_score(roll(5))
   end
   
   def roll(dice_count)
     @dice.roll(dice_count)
-    @log.info "Player rolled: #{@dice.values} for a score of #{@dice.score}"
+    @log.debug "Player rolled: #{@dice.values} for a score of #{@dice.score}"
     @dice.score
   end
 
@@ -93,4 +99,31 @@ class Player
 end
 
 class Game
+  attr_reader :players
+  def initialize(player_count = 2)
+    @players = []
+    player_count.times { @players << Player.new }
+  end
+  
+  def play
+    leader = play_initial_round
+  end
+  
+  def play_initial_round
+    while true
+      @players.each do |player|
+        player.play
+        return player if player.end_game?
+      end
+    end
+  end
+  
+  def play_lightening_round(leader)
+    remaining_players = @players - [leader]
+    remaining_players.each { |player| player.final_roll }
+  end
+  
+  def announce_winner
+    
+  end
 end
